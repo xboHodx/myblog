@@ -188,11 +188,11 @@ function main() {
     for (const t of tw) warn(`${rel}: ${t}`)
     for (const m of missing) warn(`${rel}: 双链 [[${m}]] 指向未发布文件，已降级为纯文本`)
 
-    const front = { title, ...data }
+    const front = { ...data, title }
     if (date) front.date = date
     if (data.tags && !Array.isArray(data.tags)) front.tags = [data.tags]
 
-    const body = matter.stringify(text, front).replace(/^---\n?/, '---\n')
+    const body = matter.stringify(text, front)
     outputs.push(writeOut(rel, body))
 
     posts.push({
