@@ -1,0 +1,13 @@
+node_modules/
+.tmp/
+*.log
+
+# 私有内容仓库的本地 clone（sync 的默认输入目录）
+/content/
+
+# 以下全部由 npm run sync 从私有仓库生成，不进 git
+/docs/*
+!/docs/.vitepress/
+/docs/.vitepress/generated/
+/docs/.vitepress/dist/
+/docs/.vitepress/cache/

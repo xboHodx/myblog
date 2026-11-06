@@ -1,0 +1,32 @@
+:root {
+  --vp-c-brand-1: #3b6ea5;
+  --vp-c-brand-2: #2f5a86;
+  --vp-c-brand-3: #24466a;
+}
+
+/* 首页/归档里的文章列表 */
+.vp-doc table {
+  display: table;
+  width: 100%;
+}
+.vp-doc table td:first-child {
+  white-space: nowrap;
+  color: var(--vp-c-text-2);
+  font-variant-numeric: tabular-nums;
+}
+.vp-doc table th {
+  white-space: nowrap;
+}
+
+/* 首页最近更新列表 */
+.VPHome .vp-doc h2 {
+  margin-top: 40px;
+}
+
+/* mark 高亮跟随主题 */
+.vp-doc mark {
+  background: var(--vp-c-brand-soft);
+  color: inherit;
+  padding: 0 0.2em;
+  border-radius: 3px;
+}

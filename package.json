@@ -1,0 +1,23 @@
+{
+  "name": "myblog",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "sync": "node scripts/sync.mjs",
+    "dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "preview": "vitepress preview docs",
+    "verify": "node scripts/verify.mjs"
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.4",
+    "vue": "^3.5.13"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "ignore": "^7.0.3"
+  }
+}

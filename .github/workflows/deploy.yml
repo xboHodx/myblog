@@ -1,0 +1,100 @@
+name: Deploy blog
+
+# 触发方式：
+#   1. 博客仓库自己的代码改动
+#   2. 私有内容仓库 push 后，由 repository_dispatch 远程触发
+on:
+  push:
+    branches: [main]
+  repository_dispatch:
+    types: [content-update]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时间只跑一个 Pages 部署，避免并发发布互相覆盖
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout blog
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: 检查必需的配置
+        env:
+          CONTENT_REPO: ${{ vars.CONTENT_REPO }}
+          CONTENT_TOKEN: ${{ secrets.CONTENT_TOKEN }}
+        run: |
+          missing=0
+          if [ -z "$CONTENT_REPO" ]; then
+            echo "::error::缺少仓库变量 CONTENT_REPO（格式 owner/repo），到 Settings → Secrets and variables → Actions → Variables 添加"
+            missing=1
+          fi
+          if [ -z "$CONTENT_TOKEN" ]; then
+            echo "::error::缺少 secret CONTENT_TOKEN（能只读访问私有内容仓库的 PAT）"
+            missing=1
+          fi
+          exit $missing
+
+      # 把私有仓库拉到 content/，sync 脚本默认就读这里
+      - name: Checkout private content
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ vars.CONTENT_REPO }}
+          ref: ${{ vars.CONTENT_REF || 'main' }}
+          token: ${{ secrets.CONTENT_TOKEN }}
+          path: content
+          persist-credentials: false
+
+      - name: 记录内容版本
+        run: |
+          echo "内容仓库：${{ vars.CONTENT_REPO }}@$(git -C content rev-parse --short HEAD)"
+          echo "$(git -C content log -1 --pretty='%h %s')" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # 先跑冒烟测试：白名单有没有被改坏，草稿有没有混进来
+      - name: Verify whitelist
+        run: npm run verify
+
+      - name: Sync content
+        env:
+          CONTENT_DIR: content
+        run: npm run sync
+
+      - name: Build
+        env:
+          SITE_ORIGIN: ${{ vars.SITE_ORIGIN }}
+          BASE_PATH: ${{ vars.BASE_PATH }}
+        run: npm run docs:build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/.vitepress/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,11 @@
+# 发布白名单（不是 gitignore）
+# 写进来的 = 会发布；没写的 = 永不发布；! 开头的 = 排除
+
+posts/
+notes/
+attachments/
+index.md
+
+# 即使上面包含了 notes/，这一整个目录也不发布
+!notes/private/
+!posts/secret-note.md
