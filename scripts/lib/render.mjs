@@ -28,12 +28,15 @@ export function dateFromFilename(rel) {
   return m ? `${m[1]}-${m[2]}-${m[3]}` : null
 }
 
-/** 文件名 → 可读标题：去日期前缀、去扩展名、连字符换空格。 */
+/**
+ * 文件名 → 可读标题：去日期前缀、去扩展名、连字符换空格。
+ * 下划线保留：condition_variable 这种技术名词换成空格反而变味。
+ */
 export function titleFromFilename(rel) {
   return (rel.split('/').pop() || '')
     .replace(/\.md$/i, '')
     .replace(/^\d{4}-\d{2}-\d{2}-/, '')
-    .replace(/[-_]+/g, ' ')
+    .replace(/-+/g, ' ')
     .trim()
 }
 
