@@ -58,7 +58,7 @@ Settings → Secrets and variables → Actions：
 | Variable | `SITE_TAGLINE` | 可选 | 副标题 |
 | Variable | `SITE_TEXT` | 可选 | 首页 hero 正文 |
 | Variable | `SITE_ORIGIN` | 可选 | 站点域名，用于 sitemap，如 `https://你的用户名.github.io` |
-| Variable | `CONTENT_REF` | 可选 | 内容仓库分支，默认 `main` |
+| Variable | `CONTENT_REF` | 可选 | 内容仓库分支；不填就跟随该仓库的默认分支 |
 
 站点名走变量，不用改代码。
 

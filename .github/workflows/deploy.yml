@@ -45,12 +45,14 @@ jobs:
           fi
           exit $missing
 
-      # 把私有仓库拉到 content/，sync 脚本默认就读这里
+      # 把私有仓库拉到 content/，sync 脚本默认就读这里。
+      # 不指定 ref 时 checkout 会用它自己的默认分支（你的内容仓库是 master，
+      # 所以这里绝对不能写死 main，否则 checkout 直接失败）。
       - name: Checkout private content
         uses: actions/checkout@v4
         with:
           repository: ${{ vars.CONTENT_REPO }}
-          ref: ${{ vars.CONTENT_REF || 'main' }}
+          ref: ${{ vars.CONTENT_REF }}
           token: ${{ secrets.CONTENT_TOKEN }}
           path: content
           persist-credentials: false
