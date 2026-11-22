@@ -49,13 +49,18 @@ about.md
 
 Settings → Secrets and variables → Actions：
 
-| 类型 | 名称 | 值 |
-| --- | --- | --- |
-| Variable | `CONTENT_REPO` | `你的用户名/私有内容仓库` |
-| Variable | `CONTENT_REF` | 分支，默认 `main`，可省略 |
-| Variable | `BASE_PATH` | 站点前缀，默认 `/myblog/`；仓库名不同就改这里 |
-| Variable | `SITE_ORIGIN` | 站点域名，用于 sitemap，如 `https://你的用户名.github.io` |
-| Secret | `CONTENT_TOKEN` | 能**只读**访问私有内容仓库的 PAT |
+| 类型 | 名称 | 必填 | 值 |
+| --- | --- | --- | --- |
+| Variable | `CONTENT_REPO` | ✅ | `你的用户名/私有内容仓库` |
+| Secret | `CONTENT_TOKEN` | ✅ | 能**只读**访问私有内容仓库的 PAT |
+| Variable | `BASE_PATH` | 建议 | 站点前缀，默认 `/myblog/`；仓库名不叫 myblog 就改这里 |
+| Variable | `SITE_TITLE` | 建议 | 站点名，默认「我的博客」 |
+| Variable | `SITE_TAGLINE` | 可选 | 副标题 |
+| Variable | `SITE_TEXT` | 可选 | 首页 hero 正文 |
+| Variable | `SITE_ORIGIN` | 可选 | 站点域名，用于 sitemap，如 `https://你的用户名.github.io` |
+| Variable | `CONTENT_REF` | 可选 | 内容仓库分支，默认 `main` |
+
+站点名走变量，不用改代码。
 
 `CONTENT_TOKEN` 建议用 fine-grained PAT，只授权那一个私有仓库，权限只给 `Contents: Read`。
 

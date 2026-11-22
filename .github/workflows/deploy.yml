@@ -75,6 +75,9 @@ jobs:
       - name: Sync content
         env:
           CONTENT_DIR: content
+          SITE_TITLE: ${{ vars.SITE_TITLE }}
+          SITE_TEXT: ${{ vars.SITE_TEXT }}
+          SITE_TAGLINE: ${{ vars.SITE_TAGLINE }}
         run: npm run sync
 
       - name: Build

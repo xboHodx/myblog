@@ -34,10 +34,11 @@ const DOCS = process.env.DOCS_DIR
   : path.join(ROOT, 'docs')
 const GEN = path.join(DOCS, '.vitepress', 'generated')
 
+// 站点信息全部走环境变量，CI 里由仓库 Variables 注入，不用改代码
 const SITE = {
-  title: '我的博客',
-  text: '把笔记变成站点',
-  tagline: '由 Obsidian 笔记自动发布',
+  title: process.env.SITE_TITLE || '我的博客',
+  text: process.env.SITE_TEXT || '把笔记变成站点',
+  tagline: process.env.SITE_TAGLINE || '由 Obsidian 笔记自动发布',
 }
 
 const warnings = []
