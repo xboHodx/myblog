@@ -71,11 +71,17 @@ export function renderHomepage({ posts, site }) {
   const latest = posts.slice(0, 1)
   const sections = new Set(posts.map((p) => p.section))
 
+  // 所有一级目录都列出来，点卡片直接进对应分类页
   const features = [...sections]
-    .slice(0, 4)
     .map((s) => {
       const count = posts.filter((p) => p.section === s).length
-      return `  - icon: 📚\n    title: ${JSON.stringify(s).replace(/"/g, '')}\n    details: ${count} 篇`
+      return [
+        '  - icon: 📚',
+        `    title: ${JSON.stringify(s)}`,
+        `    details: ${count} 篇`,
+        `    link: /${s}/`,
+        '    linkText: 进入',
+      ].join('\n')
     })
     .join('\n')
 
