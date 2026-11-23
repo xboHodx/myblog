@@ -103,6 +103,13 @@ function writeOut(rel, content) {
   return rel
 }
 
+/** 文件名 → 标题：只去掉 .md 和日期前缀，其余原样保留 */
+function fileNameTitle(rel) {
+  return (rel.split('/').pop() || '')
+    .replace(/\.md$/i, '')
+    .replace(/^\d{4}-\d{2}-\d{2}-/, '')
+}
+
 /** 数一下 $$ 围栏（跳过代码块），用于发现未闭合的公式 */
 function countMathFences(content) {
   let inFence = false
@@ -186,10 +193,16 @@ function main() {
       continue
     }
 
+    // 每篇笔记开头都要有一个一级标题：
+    //   已有 H1 就保留作者写的；没有就用文件名补一个。
+    // 注意是"开头"，正文中间的 H1 不算，也不动。
+    const bodyStart = parsed.content.replace(/^\s+/, '')
+    const startsWithH1 = /^#\s+/.test(bodyStart)
+    const headingFromFile = fileNameTitle(rel)
     const title =
       (typeof data.title === 'string' && data.title.trim()) ||
-      (parsed.content.match(/^#\s+(.+)$/m)?.[1] ?? '').trim() ||
-      titleFromFilename(rel)
+      (startsWithH1 ? (bodyStart.match(/^#\s+(.+)$/)?.[1] ?? '').trim() : '') ||
+      headingFromFile
 
     const date =
       normalizeDate(data.date) ||
@@ -199,7 +212,9 @@ function main() {
       normalizeDate(data.updated) ||
       dateFromFilename(rel)
 
-    const { text, warnings: tw, missing } = transformBody(parsed.content, {
+    const source = startsWithH1 ? parsed.content : `# ${title}\n\n${bodyStart}`
+
+    const { text, warnings: tw, missing } = transformBody(source, {
       currentRel: rel,
       resolveNote,
       warn,
