@@ -36,9 +36,9 @@ const GEN = path.join(DOCS, '.vitepress', 'generated')
 
 // 站点信息全部走环境变量，CI 里由仓库 Variables 注入，不用改代码
 const SITE = {
-  title: process.env.SITE_TITLE || '我的博客',
-  text: process.env.SITE_TEXT || '把笔记变成站点',
-  tagline: process.env.SITE_TAGLINE || '由 Obsidian 笔记自动发布',
+  title: process.env.SITE_TITLE || "xboHodx's NoteBook",
+  // text: process.env.SITE_TEXT || '笔记本',
+  tagline: process.env.SITE_TAGLINE || 'xboHodx的笔记本，包含很多未完成的笔记',
 }
 
 const warnings = []
