@@ -37,3 +37,10 @@
   overflow-x: auto;
   overflow-y: hidden;
 }
+
+/* KaTeX：行间公式别在窄屏撑破容器 */
+.vp-doc .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5em 0;
+}

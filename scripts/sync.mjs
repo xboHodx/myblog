@@ -103,6 +103,17 @@ function writeOut(rel, content) {
   return rel
 }
 
+/** 数一下 $$ 围栏（跳过代码块），用于发现未闭合的公式 */
+function countMathFences(content) {
+  let inFence = false
+  let count = 0
+  for (const line of content.split(/\r?\n/)) {
+    if (/^\s*(```|~~~)/.test(line)) inFence = !inFence
+    else if (!inFence && line.trim() === '$$') count++
+  }
+  return count
+}
+
 function excerpt(text) {
   const plain = text
     .replace(/```[\s\S]*?```/g, ' ')
@@ -160,6 +171,13 @@ function main() {
     } catch (e) {
       warn(`${rel} frontmatter 解析失败：${e.message}`)
       parsed = { data: {}, content: raw }
+    }
+
+    // $$ 围栏不成对时，公式会把后面的标题/正文一起吞进数学模式，
+    // 页面上表现为一整段红字报错。这里只告警，不改内容。
+    const fenceCount = countMathFences(raw)
+    if (fenceCount % 2 === 1) {
+      warn(`${rel}: $$ 围栏有 ${fenceCount} 个（奇数），公式会吞掉后面的内容，建议在 Obsidian 里检查`)
     }
 
     const data = { ...parsed.data }
