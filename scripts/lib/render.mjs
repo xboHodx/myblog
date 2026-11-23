@@ -67,11 +67,8 @@ const mdTarget = (t) => (/[\s()]/.test(t) ? `<${t}>` : t)
 const linkCell = (p) => `[${esc(p.title)}](${mdTarget(p.mdLink)})`
 
 /** 首页：hero + 最近 N 篇 */
-export function renderHomepage({ posts, site, recent = 10 }) {
-  const latest = posts.slice(0, recent)
-  const rows = latest.map(
-    (p) => `| ${p.date ?? '—'} | ${linkCell(p)} | ${esc(p.section)} |`,
-  )
+export function renderHomepage({ posts, site }) {
+  const latest = posts.slice(0, 1)
   const sections = new Set(posts.map((p) => p.section))
 
   const features = [...sections]
@@ -96,12 +93,6 @@ hero:
       text: 全部文章
       link: /archive
 ${features ? `features:\n${features}\n` : ''}---
-
-## 最近更新
-
-| 日期 | 标题 | 分类 |
-| --- | --- | --- |
-${rows.length ? rows.join('\n') : '| — | 还没有文章 | — |'}
 `
 }
 
