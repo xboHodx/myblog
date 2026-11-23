@@ -103,11 +103,64 @@ function writeOut(rel, content) {
   return rel
 }
 
+
+/**
+ * 统一标题层级。
+ *
+ * Obsidian 笔记常见的两种毛病：
+ *   1. 一个文件里出现多个 h1（`# 一、数学`、`# 二、图论`）
+ *   2. 跳过 h2 直接写 h3
+ * 两者都会让 VitePress 的「本页目录」变成一条平铺列表。
+ * 这里把正文章节统一压到 h2 起步，目录才有层级。
+ */
+function normalizeHeadingLevels(text) {
+  const lines = text.split('\n')
+  let inFence = false
+  const headings = []
+
+  lines.forEach((line, i) => {
+    if (/^\s*(```|~~~)/.test(line)) inFence = !inFence
+    else if (!inFence && /^#{1,6}\s/.test(line)) headings.push(i)
+  })
+  if (headings.length === 0) return text
+
+  const levelOf = (i) => lines[i].match(/^#{1,6}/)[0].length
+  const firstIsH1 = levelOf(headings[0]) === 1
+  const body = firstIsH1 ? headings.slice(1) : headings
+  if (body.length === 0) return text
+
+  // 正文里多出来的 h1 一律降成 h2
+  for (const i of body) {
+    if (levelOf(i) === 1) lines[i] = `##${lines[i].slice(1)}`
+  }
+
+  const min = Math.min(...body.map(levelOf))
+  const delta = 2 - min
+  if (delta === 0) return lines.join('\n')
+
+  for (const i of body) {
+    const lv = Math.min(6, Math.max(2, levelOf(i) + delta))
+    lines[i] = '#'.repeat(lv) + lines[i].replace(/^#{1,6}/, '')
+  }
+  return lines.join('\n')
+}
+
 /** 文件名 → 标题：只去掉 .md 和日期前缀，其余原样保留 */
 function fileNameTitle(rel) {
   return (rel.split('/').pop() || '')
     .replace(/\.md$/i, '')
     .replace(/^\d{4}-\d{2}-\d{2}-/, '')
+}
+
+/** 数一下正文里的一级标题（跳过代码块） */
+function countH1(content) {
+  let inFence = false
+  let count = 0
+  for (const line of content.split(/\r?\n/)) {
+    if (/^\s*(```|~~~)/.test(line)) inFence = !inFence
+    else if (!inFence && /^#\s/.test(line)) count++
+  }
+  return count
 }
 
 /** 数一下 $$ 围栏（跳过代码块），用于发现未闭合的公式 */
@@ -198,10 +251,14 @@ function main() {
     // 注意是"开头"，正文中间的 H1 不算，也不动。
     const bodyStart = parsed.content.replace(/^\s+/, '')
     const startsWithH1 = /^#\s+/.test(bodyStart)
+    // 一个文件里有多个 h1（比如把好几章塞进一篇）时，第一个 h1 不适合当页面标题，
+    // 改用文件名，原来的 h1 全部降级成 h2
+    const h1Count = countH1(bodyStart)
+    const useOwnTitle = startsWithH1 && h1Count === 1
     const headingFromFile = fileNameTitle(rel)
     const title =
       (typeof data.title === 'string' && data.title.trim()) ||
-      (startsWithH1 ? (bodyStart.match(/^#\s+(.+)$/)?.[1] ?? '').trim() : '') ||
+      (useOwnTitle ? (bodyStart.match(/^#\s+(.+)$/)?.[1] ?? '').trim() : '') ||
       headingFromFile
 
     const date =
@@ -212,7 +269,7 @@ function main() {
       normalizeDate(data.updated) ||
       dateFromFilename(rel)
 
-    const source = startsWithH1 ? parsed.content : `# ${title}\n\n${bodyStart}`
+    const source = useOwnTitle ? parsed.content : `# ${title}\n\n${bodyStart}`
 
     const { text, warnings: tw, missing } = transformBody(source, {
       currentRel: rel,
@@ -226,7 +283,8 @@ function main() {
     if (date) front.date = date
     if (data.tags && !Array.isArray(data.tags)) front.tags = [data.tags]
 
-    const body = matter.stringify(text, front)
+    const normalized = normalizeHeadingLevels(text)
+    const body = matter.stringify(normalized, front)
     outputs.push(writeOut(rel, body))
 
     posts.push({

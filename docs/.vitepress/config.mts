@@ -76,7 +76,7 @@ export default defineConfig({
   themeConfig: {
     nav: data.nav,
     sidebar: data.sidebar as never,
-    outline: { level: [2, 3], label: '本页目录' },
+    outline: { level: [2, 4], label: '本页目录' },
     docFooter: { prev: '上一篇', next: '下一篇' },
     darkModeSwitchLabel: '主题',
     sidebarMenuLabel: '目录',
