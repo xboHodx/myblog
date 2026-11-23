@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitepress'
+import mathjax3 from 'markdown-it-mathjax3'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 
@@ -50,6 +51,19 @@ export default defineConfig({
   markdown: {
     image: { lazyLoading: true },
     theme: { light: 'github-light', dark: 'github-dark' },
+    // Obsidian 笔记里的 $$...$$ / $...$ 用 MathJax 在构建期转成静态 SVG
+    config: (md) => md.use(mathjax3),
+  },
+
+  // MathJax 输出的是 <mjx-container> 这类自定义标签。
+  // 不声明 isCustomElement，Vue 会把它们当未注册组件，SSR 直接渲染成 <!---->，
+  // 公式会整段消失（这个坑查了很久）。
+  vue: {
+    template: {
+      compilerOptions: {
+        isCustomElement: (tag: string) => tag.startsWith('mjx-'),
+      },
+    },
   },
 
   sitemap: {
