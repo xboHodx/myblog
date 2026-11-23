@@ -41,8 +41,9 @@ export default defineConfig({
   lang: 'zh-CN',
   title: data.site.title,
   description: data.site.tagline ?? '',
-  // 仓库名决定这个前缀：username.github.io/<repo>/；仓库变量 BASE_PATH 可覆盖
-  base: process.env.BASE_PATH || '/myblog/',
+  // 用自定义域名时站点在根路径，base 必须是 '/'。
+  // 如果还在用 username.github.io/<repo>/ 这种项目路径，把 BASE_PATH 变量设成 /<repo>/。
+  base: process.env.BASE_PATH || '/',
   cleanUrls: false,
   ignoreDeadLinks: false,
   lastUpdated: false,
