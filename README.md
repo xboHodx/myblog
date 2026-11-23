@@ -53,11 +53,11 @@ Settings → Secrets and variables → Actions：
 | --- | --- | --- | --- |
 | Variable | `CONTENT_REPO` | ✅ | `你的用户名/私有内容仓库` |
 | Secret | `CONTENT_TOKEN` | ✅ | 能**只读**访问私有内容仓库的 PAT |
-| Variable | `BASE_PATH` | 建议 | 站点前缀，默认 `/myblog/`；仓库名不叫 myblog 就改这里 |
+| Variable | `BASE_PATH` | 可选 | 站点前缀。默认自动判断：有 `docs/public/CNAME` 用 `/`，否则用 `/<仓库名>/` |
 | Variable | `SITE_TITLE` | 建议 | 站点名，默认「我的博客」 |
 | Variable | `SITE_TAGLINE` | 可选 | 副标题 |
 | Variable | `SITE_TEXT` | 可选 | 首页 hero 正文 |
-| Variable | `SITE_ORIGIN` | 可选 | 站点域名，用于 sitemap，如 `https://你的用户名.github.io` |
+| Variable | `SITE_ORIGIN` | 可选 | 站点域名，用于 sitemap；默认取 CNAME，没有就用 `https://<用户名>.github.io` |
 | Variable | `CONTENT_REF` | 可选 | 内容仓库分支；不填就跟随该仓库的默认分支 |
 
 站点名走变量，不用改代码。
@@ -149,3 +149,12 @@ npm run docs:build     # 产物在 docs/.vitepress/dist
 | 页面 404 | `BASE_PATH` 与仓库名不一致（默认 `/myblog/`） |
 | 部署没触发 | 私有仓库的 dispatch workflow 没配，或 `deploy.yml` 不在默认分支 |
 | 图片构建失败 | 图片目录没进白名单 |
+
+## 自定义域名
+
+把域名写进 `docs/public/CNAME`（一行，不要带 `https://`），构建时会：
+
+1. 自动把 `base` 切成 `/`（站点从 `/<仓库名>/` 挪到根路径）
+2. sitemap 的域名跟着换成这个域名
+
+删掉这个文件就自动退回 `/<仓库名>/` 模式，不用改代码。想强制指定就设 `BASE_PATH` 变量，优先级最高。

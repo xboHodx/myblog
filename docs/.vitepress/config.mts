@@ -6,6 +6,34 @@ import { katex } from '@mdit/plugin-katex'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 
+/**
+ * 站点挂在哪个路径下？
+ *
+ *   有自定义域名（docs/public/CNAME 非空）→ 站点在根路径，base = '/'
+ *   没有（username.github.io/<repo>/）    → base = '/<repo>/'
+ *
+ * 仓库名从 GITHUB_REPOSITORY 拿（Actions 自动注入），本地跑就用目录名兜底。
+ * 想强制指定就设环境变量 BASE_PATH，优先级最高。
+ */
+function detectBase(): string {
+  if (process.env.BASE_PATH) return process.env.BASE_PATH
+  if (readCname()) return '/'
+  // here = <repo>/docs/.vitepress，往上两级才是仓库根目录
+  const repo =
+    process.env.GITHUB_REPOSITORY?.split('/')[1] ??
+    path.basename(path.dirname(path.dirname(here)))
+  return `/${repo}/`
+}
+
+/** GitHub Pages 的自定义域名，来自随产物发布的 CNAME 文件 */
+function readCname(): string {
+  try {
+    return fs.readFileSync(path.join(here, '..', 'public', 'CNAME'), 'utf8').trim()
+  } catch {
+    return ''
+  }
+}
+
 type Generated = {
   posts: Array<{
     rel: string
@@ -41,9 +69,7 @@ export default defineConfig({
   lang: 'zh-CN',
   title: data.site.title,
   description: data.site.tagline ?? '',
-  // 用自定义域名时站点在根路径，base 必须是 '/'。
-  // 如果还在用 username.github.io/<repo>/ 这种项目路径，把 BASE_PATH 变量设成 /<repo>/。
-  base: process.env.BASE_PATH || '/',
+  base: detectBase(),
   cleanUrls: false,
   ignoreDeadLinks: false,
   lastUpdated: false,
@@ -71,7 +97,12 @@ export default defineConfig({
   },
 
   sitemap: {
-    hostname: process.env.SITE_ORIGIN || 'https://example.github.io',
+    // 有自定义域名就用它，否则按 username.github.io 拼
+    hostname:
+      process.env.SITE_ORIGIN ||
+      (readCname()
+        ? `https://${readCname()}`
+        : `https://${process.env.GITHUB_REPOSITORY_OWNER ?? 'example'}.github.io`),
   },
 
   themeConfig: {
